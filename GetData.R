@@ -20,7 +20,6 @@ library(pdfetch)
 library(ecb)
 library(lubridate)
 library(plyr)
-
 nasa_10_nf_tr<-getEurostatRaw("nasa_10_nf_tr")
 nasa_10_f_tr<-getEurostatRaw("nasa_10_f_tr")
 prc_hicp_aind <- getEurostatRaw("prc_hicp_aind")
@@ -73,9 +72,9 @@ save(prc_hicp_aind, file="data-eurostat/long/prc_hicp_aind.RData")
 ###################################################################################
 
 #Load from my wd() to save time
-#load("/Users/tomokeeffe/data-eurostat/long/nasa_10_f_tr.RData")
-#load("/Users/tomokeeffe/data-eurostat/long/nasa_10_nf_tr.RData")
-#load("/Users/tomokeeffe/data-eurostat/long/prc_hicp_aind.RData")
+load("/Users/tomokeeffe/Desktop/R/data-eurostat/long/nasa_10_f_tr.RData")
+load("/Users/tomokeeffe/Desktop/R/data-eurostat/long/nasa_10_nf_tr.RData")
+load("/Users/tomokeeffe/Desktop/R/data-eurostat/long/prc_hicp_aind.RData")
 
 nasa_10_f_tr$time <-  as.Date(nasa_10_f_tr$time, format("%Y"))
 nasa_10_f_tr$time <- year(nasa_10_f_tr$time)
@@ -98,7 +97,6 @@ nfc_nl_prv<- filter(nasa_10_f_tr,unit == "MIO_EUR",na_item == "B9F", finpos == "
 fc_nl_prv<- filter(nasa_10_f_tr, unit == "MIO_EUR",na_item == "B9F", finpos == "LIAB", sector == "S12", co_nco == "CO")
 
 tmp2<-filter(nasa_10_nf_tr, unit=="CP_MEUR")
-tmp2<-filter(NonFinData,unit =="CP_MEUR")
 tmp21<-filter(prc_hicp_aind, coicop=="CP00",unit=="INX_A_AVG")
 
 hh_nl_prv <- filter(hh_nl_prv,  finpos == "LIAB", sector == "S14_S15", co_nco == "CO", unit == "MIO_EUR", na_item == "B9F")
@@ -323,17 +321,64 @@ DF$nl_prv_pc<-(as.numeric(DF$nl_prv))/(DF$disp_inc_nonfin)*-100
 
 DF$S_pc_disp<-(DF$S_nonfin/DF$disp_inc_nonfin)*100
 
-#DF <- filter(DF, geo.time %in% list("US", "EA","EA18","EEA","EU","HR","ME","RS"))
-DF <- filter(DF, geo.time != "US")
-DF <- filter(DF, geo.time != "EA")
-DF <- filter(DF, geo.time != "EA18")
-DF <- filter(DF, geo.time != "EEA")
-DF <- filter(DF, geo.time != "EU")
-DF <- filter(DF, geo.time != "HR")
-DF <- filter(DF, geo.time != "ME")
-DF <- filter(DF, geo.time != "RS")
+DF <- filter(DF, !(geo.time %in% c("US", "EA","EA18","EEA","EU","HR","ME","RS")))
+#DF <- filter(DF, geo.time != "US")
+##DF <- filter(DF, geo.time != "EA")
+#DF <- filter(DF, geo.time != "EA18")
+#DF <- filter(DF, geo.time != "EEA")
+#DF <- filter(DF, geo.time != "EU")
+#DF <- filter(DF, geo.time != "HR")
+#DF <- filter(DF, geo.time != "ME")
+#DF <- filter(DF, geo.time != "RS")
 
 
-#DF$gdp_d <- (DF$gdp/lag(DF$gdp, 1) -1)*100
+#Renaming
+DF$geo.time[DF$geo.time=="AT"] <- "Austria"
+DF$geo.time[DF$geo.time=="BE"] <- "Belgium"
+DF$geo.time[DF$geo.time=="BG"] <- "Bulgaria"
+DF$geo.time[DF$geo.time=="CH"] <- "Switzerland"
+DF$geo.time[DF$geo.time=="CY"] <- "Cyprus"
+DF$geo.time[DF$geo.time=="CZ"] <- "Czech Republic"
+DF$geo.time[DF$geo.time=="DE"] <- "Germany"
+DF$geo.time[DF$geo.time=="DK"] <- "Denmark"
+DF$geo.time[DF$geo.time=="EA19"] <- "Euro Area(19 Countries)"
+DF$geo.time[DF$geo.time=="EE"] <- "Estonia"
+DF$geo.time[DF$geo.time=="EL"] <- "Greece"
+DF$geo.time[DF$geo.time=="ES"] <- "Spain"
+DF$geo.time[DF$geo.time=="EU28"] <- "EU 28 Countries"
+DF$geo.time[DF$geo.time=="FI"] <- "Finland"
+DF$geo.time[DF$geo.time=="FR"] <- "France"
+DF$geo.time[DF$geo.time=="HU"] <- "Hungary"
+DF$geo.time[DF$geo.time=="IE"] <- "Ireland"
+DF$geo.time[DF$geo.time=="IS"] <- "Iceland"
+DF$geo.time[DF$geo.time=="IT"] <- "Italy"
+DF$geo.time[DF$geo.time=="LT"] <- "Lithuania"
+DF$geo.time[DF$geo.time=="LU"] <- "Luxembourg"
+DF$geo.time[DF$geo.time=="LV"] <- "Latvia"
+DF$geo.time[DF$geo.time=="MT"] <- "Malta"
+DF$geo.time[DF$geo.time=="NL"] <- "Netherlands"
+DF$geo.time[DF$geo.time=="NO"] <- "Norway"
+DF$geo.time[DF$geo.time=="PL"] <- "Poland"
+DF$geo.time[DF$geo.time=="PT"] <- "Portugal"
+DF$geo.time[DF$geo.time=="RO"] <- "Romania"
+DF$geo.time[DF$geo.time=="SE"] <- "Sweden"
+DF$geo.time[DF$geo.time=="SI"] <- "Slovenia"
+DF$geo.time[DF$geo.time=="SK"] <- "Slovakia"
+DF$geo.time[DF$geo.time=="TR"] <- "Turkey"
+DF$geo.time[DF$geo.time=="UK"] <- "UK"
+
+is.num <- sapply(DF, is.numeric)
+DF[is.num] <- lapply(DF[is.num], round, 2)
+
 save(DF, file = "/Users/tomokeeffe/Desktop/R/7Processes/AllData.RData")
+M3 <- get_data("BSI.M.U2.Y.V.M30.X.I.U2.2300.Z01.V")
+M3$obstime <- as.Date(as.yearmon(M3$obstime))
+save(M3, file = "/Users/tomokeeffe/Desktop/R/7Processes/M3.RData")
+
+#00c0ef Blue
+#00a65a Green
+#006312 dark green
+#f39c12 warning
+
+
 
